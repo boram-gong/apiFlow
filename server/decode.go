@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/boram-gong/apiFlow/operation/db_client"
-	"github.com/boram-gong/json-decorator/common/body"
+	json_comm "github.com/boram-gong/json-decorator/common"
 	"github.com/boram-gong/service/svc"
 	"github.com/gin-gonic/gin"
 	json "github.com/json-iterator/go"
@@ -21,7 +21,7 @@ func DecodeNull(c *gin.Context) (interface{}, error) {
 
 // 解析json转换服务请求体
 func DecodeTagJsonReq(c *gin.Context) (interface{}, error) {
-	reqBody := &body.JsonReq{}
+	reqBody := &json_comm.JsonReq{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
@@ -51,7 +51,7 @@ func DecodeTagJsonReq(c *gin.Context) (interface{}, error) {
 
 // 解析新增（post）规则请求体
 func DecodePostJsonRule(c *gin.Context) (interface{}, error) {
-	reqBody := &body.SaveRuleReq{}
+	reqBody := &json_comm.SaveRuleReq{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
@@ -74,7 +74,7 @@ func DecodePostJsonRule(c *gin.Context) (interface{}, error) {
 
 // 解析修改（put）规则请求体
 func DecodePutJsonRule(c *gin.Context) (interface{}, error) {
-	reqBody := &body.SaveRuleReq{}
+	reqBody := &json_comm.SaveRuleReq{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")

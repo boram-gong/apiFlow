@@ -3,7 +3,6 @@ package operation
 import (
 	dbt "github.com/boram-gong/db_tool"
 	dbt_pg "github.com/boram-gong/db_tool/pg"
-	"github.com/boram-gong/json-decorator/common"
 	json "github.com/json-iterator/go"
 	"log"
 	"strings"
@@ -42,9 +41,9 @@ func Query(querySql string, db dbt.DB) (result []map[string]interface{}, err err
 			continue
 		}
 		for k, v := range m {
-			if strings.Contains(common.Interface2String(v), "}") {
+			if strings.Contains(dbt.Interface2String(v), "}") {
 				temp := make(map[string]interface{})
-				if json.UnmarshalFromString(common.Interface2String(v), &temp) == nil {
+				if json.UnmarshalFromString(dbt.Interface2String(v), &temp) == nil {
 					m[k] = temp
 				}
 			}

@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/boram-gong/db_tool v0.0.4
-	github.com/boram-gong/json-decorator v0.0.2-0.20220413101745-33504cf59a92
+	github.com/boram-gong/json-decorator v0.0.2-0.20220426092024-8a00a6df3654
 	github.com/boram-gong/service v0.0.0-20220425092642-19c1ca05e181
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-contrib/gzip v0.0.5

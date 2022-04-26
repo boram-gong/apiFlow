@@ -8,7 +8,6 @@ import (
 	dbt "github.com/boram-gong/db_tool"
 	dbt_ms "github.com/boram-gong/db_tool/mysql"
 	dbt_pg "github.com/boram-gong/db_tool/pg"
-	"github.com/boram-gong/json-decorator/common"
 	"sync"
 )
 
@@ -31,7 +30,7 @@ func GetAllClient() []*comm.DBClient {
 	result, _ := operation.Query(dbt.SelectFieldsSql(DbClientTable, "content", ""), operation.SelfClient)
 	for _, m := range result {
 		var data comm.DBClient
-		if err := comm.Decode(common.Interface2String(m["content"]), &data); err != nil {
+		if err := comm.Decode(dbt.Interface2String(m["content"]), &data); err != nil {
 			continue
 		}
 		respData = append(respData, &data)
@@ -45,7 +44,7 @@ func GetOneClient(name string) *comm.DBClient {
 	if ok {
 		result, _ := operation.Query(dbt.SelectFieldsSql(DbClientTable, "content", "name='"+name+"'"), operation.SelfClient)
 		for _, m := range result {
-			if err := comm.Decode(common.Interface2String(m["content"]), &data); err != nil {
+			if err := comm.Decode(dbt.Interface2String(m["content"]), &data); err != nil {
 				continue
 			}
 		}
