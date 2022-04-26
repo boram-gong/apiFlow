@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/boram-gong/apiFlow/operation"
-	"github.com/boram-gong/json-decorator/common"
+	dbt "github.com/boram-gong/db_tool"
 	"github.com/boram-gong/json-decorator/common/body"
 	"github.com/boram-gong/json-decorator/rule"
 	json "github.com/json-iterator/go"
@@ -17,28 +17,28 @@ const (
 func ReAllRule() []body.SaveRuleReq {
 	ruleMap := rule.NewAllRuleSafeMap()
 	var respData []body.SaveRuleReq
-	result, _ := operation.Query(operation.SelectFieldsSql(JsonRuleTable, "*", ""), operation.SelfClient)
+	result, _ := operation.Query(dbt.SelectFieldsSql(JsonRuleTable, "*", ""), operation.SelfClient)
 	for _, m := range result {
 		var data []body.UserRule
-		if err := json.UnmarshalFromString(common.Interface2String(m["rule"]), &data); err != nil {
+		if err := json.UnmarshalFromString(dbt.Interface2String(m["rule"]), &data); err != nil {
 			continue
 		}
 		respData = append(respData, body.SaveRuleReq{
-			Id:        common.Interface2Int(m["id"]),
-			Name:      common.Interface2String(m["rule_name"]),
+			Id:        dbt.Interface2Int(m["id"]),
+			Name:      dbt.Interface2String(m["rule_name"]),
 			Rules:     data,
-			Stat:      common.Interface2Int(m["stat"]),
-			StartTime: common.Interface2String(m["start_time"]),
-			EndTime:   common.Interface2String(m["end_time"]),
+			Stat:      dbt.Interface2Int(m["stat"]),
+			StartTime: dbt.Interface2String(m["start_time"]),
+			EndTime:   dbt.Interface2String(m["end_time"]),
 		})
 		for _, d := range data {
 			r := &rule.Rule{
 				Key:       d.Key,
 				Operation: d.Operation,
 				Content:   d.Content,
-				Stat:      common.Interface2Int(m["stat"]),
-				StartTime: common.Interface2String(m["start_time"]),
-				EndTime:   common.Interface2String(m["end_time"]),
+				Stat:      dbt.Interface2Int(m["stat"]),
+				StartTime: dbt.Interface2String(m["start_time"]),
+				EndTime:   dbt.Interface2String(m["end_time"]),
 			}
 			ruleName := fmt.Sprintf("%v", m["rule_name"])
 			ruleMap.UnSafeStore(ruleName, r)
@@ -50,19 +50,19 @@ func ReAllRule() []body.SaveRuleReq {
 
 func GetAllRule() []body.SaveRuleReq {
 	var respData []body.SaveRuleReq
-	result, _ := operation.Query(operation.SelectFieldsSql(JsonRuleTable, "*", ""), operation.SelfClient)
+	result, _ := operation.Query(dbt.SelectFieldsSql(JsonRuleTable, "*", ""), operation.SelfClient)
 	for _, m := range result {
 		var data []body.UserRule
-		if err := json.UnmarshalFromString(common.Interface2String(m["rule"]), &data); err != nil {
+		if err := json.UnmarshalFromString(dbt.Interface2String(m["rule"]), &data); err != nil {
 			continue
 		}
 		respData = append(respData, body.SaveRuleReq{
-			Id:        common.Interface2Int(m["id"]),
-			Name:      common.Interface2String(m["rule_name"]),
+			Id:        dbt.Interface2Int(m["id"]),
+			Name:      dbt.Interface2String(m["rule_name"]),
 			Rules:     data,
-			Stat:      common.Interface2Int(m["stat"]),
-			StartTime: common.Interface2String(m["start_time"]),
-			EndTime:   common.Interface2String(m["end_time"]),
+			Stat:      dbt.Interface2Int(m["stat"]),
+			StartTime: dbt.Interface2String(m["start_time"]),
+			EndTime:   dbt.Interface2String(m["end_time"]),
 		})
 	}
 	return respData
@@ -70,19 +70,19 @@ func GetAllRule() []body.SaveRuleReq {
 
 func GetOneRule(id int) body.SaveRuleReq {
 	var respData body.SaveRuleReq
-	result, _ := operation.Query(operation.SelectFieldsSql(JsonRuleTable, "*", fmt.Sprintf("id=%v", id)), operation.SelfClient)
+	result, _ := operation.Query(dbt.SelectFieldsSql(JsonRuleTable, "*", fmt.Sprintf("id=%v", id)), operation.SelfClient)
 	for _, m := range result {
 		var data []body.UserRule
-		if err := json.UnmarshalFromString(common.Interface2String(m["rule"]), &data); err != nil {
+		if err := json.UnmarshalFromString(dbt.Interface2String(m["rule"]), &data); err != nil {
 			continue
 		}
 		respData = body.SaveRuleReq{
-			Id:        common.Interface2Int(m["id"]),
-			Name:      common.Interface2String(m["rule_name"]),
+			Id:        dbt.Interface2Int(m["id"]),
+			Name:      dbt.Interface2String(m["rule_name"]),
 			Rules:     data,
-			Stat:      common.Interface2Int(m["stat"]),
-			StartTime: common.Interface2String(m["start_time"]),
-			EndTime:   common.Interface2String(m["end_time"]),
+			Stat:      dbt.Interface2Int(m["stat"]),
+			StartTime: dbt.Interface2String(m["start_time"]),
+			EndTime:   dbt.Interface2String(m["end_time"]),
 		}
 		break
 	}
@@ -102,7 +102,7 @@ func SaveRule(data *body.SaveRuleReq) error {
 			fmt.Sprintf("start_time='%v'", data.StartTime),
 			fmt.Sprintf("end_time='%v'", data.EndTime),
 		}
-		saveSql = operation.UpdateSql(JsonRuleTable, fmt.Sprintf("id=%v", data.Id), change)
+		saveSql = dbt.UpdateSql(JsonRuleTable, fmt.Sprintf("id=%v", data.Id), change)
 	} else {
 		fields := []string{"rule_name", "rule", "stat", "start_time", "end_time"}
 		values := fmt.Sprintf("'%v','%v',%v,'%v','%v'",
@@ -112,7 +112,7 @@ func SaveRule(data *body.SaveRuleReq) error {
 			data.StartTime,
 			data.EndTime,
 		)
-		saveSql = operation.InsertSql(JsonRuleTable, fields, values)
+		saveSql = dbt.InsertSql(JsonRuleTable, fields, values)
 	}
 	_, err = operation.SelfClient.Exec(saveSql)
 	if err != nil {
@@ -125,7 +125,7 @@ func DeleteRule(id int) error {
 	if id == 0 {
 		return errors.New("id is null")
 	}
-	_, err := operation.SelfClient.Exec(operation.DeleteSql(JsonRuleTable, fmt.Sprintf("id=%v", id)))
+	_, err := operation.SelfClient.Exec(dbt.DeleteSql(JsonRuleTable, fmt.Sprintf("id=%v", id)))
 	if err != nil {
 		return err
 	}

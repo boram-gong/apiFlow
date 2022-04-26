@@ -1,4 +1,4 @@
-package cfg
+package common
 
 import dbt "github.com/boram-gong/db_tool"
 

@@ -1,16 +1,18 @@
-package svc
+package server
 
 import (
 	"fmt"
-	"github.com/boram-gong/apiFlow/cfg"
-	"github.com/boram-gong/apiFlow/operation/db_client"
-	"github.com/boram-gong/json-decorator/common/body"
-	"github.com/gin-gonic/gin"
-	json "github.com/json-iterator/go"
+	"github.com/boram-gong/apiFlow/common"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/boram-gong/apiFlow/operation/db_client"
+	"github.com/boram-gong/json-decorator/common/body"
+	"github.com/boram-gong/service/svc"
+	"github.com/gin-gonic/gin"
+	json "github.com/json-iterator/go"
 )
 
 func DecodeNull(c *gin.Context) (interface{}, error) {
@@ -22,7 +24,7 @@ func DecodeTagJsonReq(c *gin.Context) (interface{}, error) {
 	reqBody := &body.JsonReq{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -30,7 +32,7 @@ func DecodeTagJsonReq(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 
@@ -40,7 +42,7 @@ func DecodeTagJsonReq(c *gin.Context) (interface{}, error) {
 		case []interface{}:
 			reqBody.JsonSlice = reqBody.Data.([]interface{})
 		default:
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 	}
@@ -52,7 +54,7 @@ func DecodePostJsonRule(c *gin.Context) (interface{}, error) {
 	reqBody := &body.SaveRuleReq{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -60,11 +62,11 @@ func DecodePostJsonRule(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 		if reqBody.Id != 0 {
-			return nil, NewError(http.StatusBadRequest, "save id != 0")
+			return nil, svc.NewError(http.StatusBadRequest, "save id != 0")
 		}
 	}
 	return reqBody, nil
@@ -75,7 +77,7 @@ func DecodePutJsonRule(c *gin.Context) (interface{}, error) {
 	reqBody := &body.SaveRuleReq{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -83,11 +85,11 @@ func DecodePutJsonRule(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 		if reqBody.Id == 0 {
-			return nil, NewError(http.StatusBadRequest, "save id == 0")
+			return nil, svc.NewError(http.StatusBadRequest, "save id == 0")
 		}
 	}
 	return reqBody, nil
@@ -108,10 +110,10 @@ func DecodeDbName(c *gin.Context) (interface{}, error) {
 }
 
 func DecodePostDbClient(c *gin.Context) (interface{}, error) {
-	reqBody := &cfg.DBClient{}
+	reqBody := &common.DBClient{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -119,7 +121,7 @@ func DecodePostDbClient(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 		if reqBody.Cfg.MaxOpenConn == 0 {
@@ -133,10 +135,10 @@ func DecodePostDbClient(c *gin.Context) (interface{}, error) {
 }
 
 func DecodePutDbClient(c *gin.Context) (interface{}, error) {
-	reqBody := &cfg.DBClient{}
+	reqBody := &common.DBClient{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -144,7 +146,7 @@ func DecodePutDbClient(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 		reqBody.Op = db_client.UPDATE
@@ -161,9 +163,9 @@ func DecodePutDbClient(c *gin.Context) (interface{}, error) {
 
 func DecodeDeleteDbClient(c *gin.Context) (interface{}, error) {
 	if c.Query("name") == "" {
-		return nil, NewError(http.StatusBadRequest, "name is null")
+		return nil, svc.NewError(http.StatusBadRequest, "name is null")
 	}
-	reqBody := &cfg.DBClient{
+	reqBody := &common.DBClient{
 		Name: c.Query("name"),
 		Op:   db_client.DELETE,
 	}
@@ -172,10 +174,10 @@ func DecodeDeleteDbClient(c *gin.Context) (interface{}, error) {
 }
 
 func DecodeServerApiReq(c *gin.Context) (interface{}, error) {
-	reqBody := &cfg.ServerApiCfg{}
+	reqBody := &common.ServerApiCfg{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -183,7 +185,7 @@ func DecodeServerApiReq(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 		reqBody.HttpMethod = strings.ToTitle(reqBody.HttpMethod)
@@ -193,10 +195,10 @@ func DecodeServerApiReq(c *gin.Context) (interface{}, error) {
 }
 
 func DecodeServerApiPathReq(c *gin.Context) (interface{}, error) {
-	reqBody := &cfg.ServerApiPath{}
+	reqBody := &common.ServerApiPath{}
 	buf, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		return nil, NewError(http.StatusBadRequest, "cannot read body of http request")
+		return nil, svc.NewError(http.StatusBadRequest, "cannot read body of http request")
 	}
 	if len(buf) > 0 {
 		if err = json.ConfigFastest.Unmarshal(buf, &reqBody); err != nil {
@@ -204,7 +206,7 @@ func DecodeServerApiPathReq(c *gin.Context) (interface{}, error) {
 			if len(buf) > size {
 				buf = buf[:size]
 			}
-			return nil, NewError(http.StatusBadRequest,
+			return nil, svc.NewError(http.StatusBadRequest,
 				fmt.Sprintf("request body '%s': cannot parse non-json request body", buf))
 		}
 		reqBody.HttpMethod = strings.ToTitle(reqBody.HttpMethod)

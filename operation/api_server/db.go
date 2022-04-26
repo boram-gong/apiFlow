@@ -3,14 +3,15 @@ package api_server
 import (
 	"fmt"
 	"github.com/boram-gong/apiFlow/operation"
+	dbt "github.com/boram-gong/db_tool"
 )
 
 const (
-	SqlServerTable = "api_server"
+	SqlServerTable = "sql_server"
 )
 
 func InsertNewApiServer(key, content string) error {
-	s := operation.InsertSql(
+	s := dbt.InsertSql(
 		SqlServerTable,
 		[]string{"key", "del", "content"},
 		fmt.Sprintf("'%v',0,'%v'", key, content),
@@ -25,7 +26,7 @@ func InsertNewApiServer(key, content string) error {
 }
 
 func UpdateApiServer(key, content string) error {
-	s := operation.UpdateSql(
+	s := dbt.UpdateSql(
 		SqlServerTable,
 		fmt.Sprintf("key='%v'", key),
 		[]string{"del=0", "content='" + content + "'"},
@@ -35,7 +36,7 @@ func UpdateApiServer(key, content string) error {
 }
 
 func DeleteApiServer(key string) error {
-	s := operation.UpdateSql(
+	s := dbt.UpdateSql(
 		SqlServerTable,
 		fmt.Sprintf("key='%v'", key),
 		[]string{"del=1", "content=''"},
@@ -45,5 +46,5 @@ func DeleteApiServer(key string) error {
 }
 
 func ClearFailureApiServer() {
-	_, _ = operation.SelfClient.Exec(operation.DeleteSql(SqlServerTable, "del!=0"))
+	_, _ = operation.SelfClient.Exec(dbt.DeleteSql(SqlServerTable, "del!=0"))
 }

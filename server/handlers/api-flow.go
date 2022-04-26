@@ -2,22 +2,22 @@ package handlers
 
 import (
 	"context"
-	"github.com/boram-gong/apiFlow/cfg"
 	"github.com/boram-gong/apiFlow/common"
 	"github.com/boram-gong/apiFlow/operation/api_server"
 	"github.com/boram-gong/apiFlow/operation/db_client"
 	dbt "github.com/boram-gong/db_tool"
+	"github.com/boram-gong/service/body"
 )
 
 func GetApiServer(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
+	respBody := body.NewCommonResp()
 	respBody.Data = api_server.GetAllSqlServer()
 	return respBody, nil
 }
 
 func MakeApiServer(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
-	req := request.(*cfg.ServerApiCfg)
+	respBody := body.NewCommonResp()
+	req := request.(*common.ServerApiCfg)
 	cli, ok := db_client.DBContainer.Load(req.DbClientName)
 	if !ok || cli == nil {
 		respBody.FailResp(404, "req.DbClientName "+"error")
@@ -31,8 +31,8 @@ func MakeApiServer(ctx context.Context, request interface{}) (interface{}, error
 }
 
 func ChangeApiServer(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
-	req := request.(*cfg.ServerApiCfg)
+	respBody := body.NewCommonResp()
+	req := request.(*common.ServerApiCfg)
 	cli, ok := db_client.DBContainer.Load(req.DbClientName)
 	if !ok || cli == nil {
 		respBody.FailResp(404, "req.DbClientName "+"error")
@@ -46,8 +46,8 @@ func ChangeApiServer(ctx context.Context, request interface{}) (interface{}, err
 }
 
 func DeleteApiServer(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
-	req := request.(*cfg.ServerApiPath)
+	respBody := body.NewCommonResp()
+	req := request.(*common.ServerApiPath)
 	err := api_server.DeleteServerRoute(req.ServerPort, req.HttpMethod, req.RelativePath)
 	if err != nil {
 		respBody.FailResp(404, err.Error())

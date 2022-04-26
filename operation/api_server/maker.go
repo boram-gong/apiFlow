@@ -2,7 +2,6 @@ package api_server
 
 import (
 	"errors"
-	"github.com/boram-gong/apiFlow/cfg"
 	"github.com/boram-gong/apiFlow/common"
 	"github.com/boram-gong/apiFlow/operation"
 	"github.com/boram-gong/apiFlow/operation/db_client"
@@ -15,13 +14,14 @@ import (
 var ServerContainer sync.Map
 
 func InitSqlServer() {
-	serverCfg, _ := operation.Query(operation.SelectFieldsSql(
+	ClearFailureApiServer()
+	serverCfg, _ := operation.Query(dbt.SelectFieldsSql(
 		SqlServerTable,
 		"content",
 		"del=0",
 	), operation.SelfClient)
 	for _, c := range serverCfg {
-		var apiCfg cfg.ServerApiCfg
+		var apiCfg common.ServerApiCfg
 		if err := common.Decode(c["content"].(string), &apiCfg); err != nil {
 			continue
 		}
@@ -32,13 +32,13 @@ func InitSqlServer() {
 	}
 }
 
-func GetAllSqlServer() (out []cfg.ServerApiCfg) {
-	serverCfg, _ := operation.Query(operation.SelectFieldsSql(
+func GetAllSqlServer() (out []common.ServerApiCfg) {
+	serverCfg, _ := operation.Query(dbt.SelectFieldsSql(
 		SqlServerTable,
 		[]string{"del", "content"},
 		"del!=1"), operation.SelfClient)
 	for _, c := range serverCfg {
-		var apiCfg cfg.ServerApiCfg
+		var apiCfg common.ServerApiCfg
 		if err := common.Decode(c["content"].(string), &apiCfg); err != nil {
 			continue
 		}
@@ -49,7 +49,7 @@ func GetAllSqlServer() (out []cfg.ServerApiCfg) {
 }
 
 // 新增注册路由
-func MakeServer(apiCfg *cfg.ServerApiCfg, client dbt.DB) error {
+func MakeServer(apiCfg *common.ServerApiCfg, client dbt.DB) error {
 	var (
 		server *ServerStatus
 	)
@@ -81,7 +81,7 @@ func MakeServer(apiCfg *cfg.ServerApiCfg, client dbt.DB) error {
 	return InsertNewApiServer(apiCfg.ServerPort+apiCfg.HttpMethod+apiCfg.RelativePath, common.Encode(apiCfg))
 }
 
-func ChangeServerRoute(change *cfg.ServerApiCfg, cli dbt.DB) error {
+func ChangeServerRoute(change *common.ServerApiCfg, cli dbt.DB) error {
 	server, ok := ServerContainer.Load(change.ServerPort)
 	if ok {
 		return server.(*ServerStatus).ChangeRoute(change, cli.(dbt.DB))

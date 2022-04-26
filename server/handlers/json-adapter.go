@@ -2,16 +2,16 @@ package handlers
 
 import (
 	"context"
-	"github.com/boram-gong/apiFlow/common"
 	"github.com/boram-gong/apiFlow/operation/json_rule"
-	"github.com/boram-gong/json-decorator/common/body"
+	json_body "github.com/boram-gong/json-decorator/common/body"
 	json_op "github.com/boram-gong/json-decorator/operation"
+	"github.com/boram-gong/service/body"
 )
 
 // json转化器服务
 func JsonDecorator(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
-	reqBody := request.(*body.JsonReq)
+	respBody := body.NewCommonResp()
+	reqBody := request.(*json_body.JsonReq)
 	if reqBody.JsonMap != nil {
 		respJson := reqBody.JsonMap
 		err := json_op.DecoratorJsonByRule(reqBody.Name, respJson)
@@ -39,13 +39,13 @@ func JsonDecorator(ctx context.Context, request interface{}) (interface{}, error
 // 读取json转换规则服务
 func ReadJsonRule(ctx context.Context, request interface{}) (interface{}, error) {
 	if request.(int) == 0 {
-		respBody := common.NewCommonResp()
+		respBody := body.NewCommonResp()
 		respBody.Data = json_rule.GetAllRule()
 
 		return respBody, nil
 	} else {
 		oneRule := json_rule.GetOneRule(request.(int))
-		respBody := common.NewCommonResp()
+		respBody := body.NewCommonResp()
 		respBody.Data = oneRule
 		return respBody, nil
 	}
@@ -53,8 +53,8 @@ func ReadJsonRule(ctx context.Context, request interface{}) (interface{}, error)
 
 // 存储json转换规则服务
 func SaveRule(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
-	saveData := request.(*body.SaveRuleReq)
+	respBody := body.NewCommonResp()
+	saveData := request.(*json_body.SaveRuleReq)
 	if err := json_rule.SaveRule(saveData); err != nil {
 		respBody.FailResp(500, err.Error())
 	}
@@ -64,7 +64,7 @@ func SaveRule(ctx context.Context, request interface{}) (interface{}, error) {
 
 // 删除json转换规则服务
 func DeleteRule(ctx context.Context, request interface{}) (interface{}, error) {
-	respBody := common.NewCommonResp()
+	respBody := body.NewCommonResp()
 	if err := json_rule.DeleteRule(request.(int)); err != nil {
 		respBody.FailResp(400, err.Error())
 	}
@@ -75,6 +75,6 @@ func DeleteRule(ctx context.Context, request interface{}) (interface{}, error) {
 // 重置json转换规则服务
 func ReRule(ctx context.Context, request interface{}) (interface{}, error) {
 	json_rule.ReAllRule()
-	respBody := common.NewCommonResp()
+	respBody := body.NewCommonResp()
 	return respBody, nil
 }

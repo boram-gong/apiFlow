@@ -3,10 +3,10 @@ package api_server
 import (
 	"errors"
 	"fmt"
-	"github.com/boram-gong/apiFlow/cfg"
 	"github.com/boram-gong/apiFlow/common"
 	"github.com/boram-gong/apiFlow/operation"
 	dbt "github.com/boram-gong/db_tool"
+	"github.com/boram-gong/service/body"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"sync"
@@ -23,7 +23,7 @@ type ServerStatus struct {
 	Err    error
 }
 
-func (s *ServerStatus) NewRoute(apiCfg *cfg.ServerApiCfg, client dbt.DB) error {
+func (s *ServerStatus) NewRoute(apiCfg *common.ServerApiCfg, client dbt.DB) error {
 	s.Lock()
 	defer s.Unlock()
 	route, ok := s.Route[apiCfg.HttpMethod+apiCfg.RelativePath]
@@ -44,7 +44,7 @@ func (s *ServerStatus) NewRoute(apiCfg *cfg.ServerApiCfg, client dbt.DB) error {
 				c.JSON(404, nil)
 			} else {
 				var (
-					body     = common.NewCommonResp()
+					body     = body.NewCommonResp()
 					querySql = route.Cfg.Sql
 					e        error
 					result   interface{}
@@ -81,7 +81,7 @@ func (s *ServerStatus) NewRoute(apiCfg *cfg.ServerApiCfg, client dbt.DB) error {
 	return nil
 }
 
-func (s *ServerStatus) ChangeRoute(change *cfg.ServerApiCfg, cli dbt.DB) error {
+func (s *ServerStatus) ChangeRoute(change *common.ServerApiCfg, cli dbt.DB) error {
 	s.Lock()
 	defer s.Unlock()
 	route, ok := s.Route[change.HttpMethod+change.RelativePath]
@@ -127,7 +127,7 @@ func (s *ServerStatus) DeleteAllRoute() {
 	defer s.Unlock()
 	for _, r := range s.Route {
 		r.Valid = false
-		delSql := operation.UpdateSql(
+		delSql := dbt.UpdateSql(
 			SqlServerTable,
 			fmt.Sprintf("key='%v'", r.Cfg.ServerPort+r.Cfg.HttpMethod+r.Cfg.RelativePath),
 			[]string{"del=2"},
@@ -137,12 +137,12 @@ func (s *ServerStatus) DeleteAllRoute() {
 }
 
 type RouteStatus struct {
-	Cfg   *cfg.ServerApiCfg
+	Cfg   *common.ServerApiCfg
 	Db    dbt.DB
 	Valid bool
 }
 
-func ArgDeal(s string, args []cfg.ApiArg, c *gin.Context) (string, error) {
+func ArgDeal(s string, args []common.ApiArg, c *gin.Context) (string, error) {
 	for _, arg := range args {
 		if arg.Source == UrlArg {
 			if c.Query(arg.Key) != "" {

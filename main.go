@@ -5,7 +5,7 @@ import (
 	"github.com/boram-gong/apiFlow/operation/api_server"
 	"github.com/boram-gong/apiFlow/operation/db_client"
 	"github.com/boram-gong/apiFlow/operation/json_rule"
-	"github.com/boram-gong/apiFlow/service/svc/server"
+	"github.com/boram-gong/apiFlow/server"
 	"time"
 )
 
@@ -20,5 +20,5 @@ func main() {
 	}()
 	db_client.InitAllClient()
 	api_server.InitSqlServer()
-	server.Run()
+	server.Run("29999", "")
 }

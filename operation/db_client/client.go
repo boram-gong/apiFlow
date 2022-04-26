@@ -3,7 +3,6 @@ package db_client
 import (
 	"errors"
 	"fmt"
-	"github.com/boram-gong/apiFlow/cfg"
 	comm "github.com/boram-gong/apiFlow/common"
 	"github.com/boram-gong/apiFlow/operation"
 	dbt "github.com/boram-gong/db_tool"
@@ -27,11 +26,11 @@ var (
 	DBContainer sync.Map
 )
 
-func GetAllClient() []*cfg.DBClient {
-	var respData []*cfg.DBClient
-	result, _ := operation.Query(operation.SelectFieldsSql(DbClientTable, "content", ""), operation.SelfClient)
+func GetAllClient() []*comm.DBClient {
+	var respData []*comm.DBClient
+	result, _ := operation.Query(dbt.SelectFieldsSql(DbClientTable, "content", ""), operation.SelfClient)
 	for _, m := range result {
-		var data cfg.DBClient
+		var data comm.DBClient
 		if err := comm.Decode(common.Interface2String(m["content"]), &data); err != nil {
 			continue
 		}
@@ -40,11 +39,11 @@ func GetAllClient() []*cfg.DBClient {
 	return respData
 }
 
-func GetOneClient(name string) *cfg.DBClient {
-	var data cfg.DBClient
+func GetOneClient(name string) *comm.DBClient {
+	var data comm.DBClient
 	_, ok := DBContainer.Load(name)
 	if ok {
-		result, _ := operation.Query(operation.SelectFieldsSql(DbClientTable, "content", "name='"+name+"'"), operation.SelfClient)
+		result, _ := operation.Query(dbt.SelectFieldsSql(DbClientTable, "content", "name='"+name+"'"), operation.SelfClient)
 		for _, m := range result {
 			if err := comm.Decode(common.Interface2String(m["content"]), &data); err != nil {
 				continue
@@ -63,7 +62,7 @@ func InitAllClient() {
 			client, fail := MakeDB(cli.Source, cli.Cfg)
 			if fail != nil {
 				cli.State = "fail: " + fail.Error()
-				operation.SelfClient.Exec(operation.UpdateSql(
+				operation.SelfClient.Exec(dbt.UpdateSql(
 					DbClientTable,
 					fmt.Sprintf("name='%v'", cli.Name),
 					[]string{"content='" + comm.Encode(cli) + "'"},
@@ -77,12 +76,12 @@ func InitAllClient() {
 	}
 }
 
-func NewDB(c *cfg.DBClient) error {
+func OperateDB(c *comm.DBClient) error {
 	_, ok := DBContainer.Load(c.Name)
 	if ok {
 		switch c.Op {
 		case DELETE:
-			if _, err := operation.SelfClient.Exec(operation.DeleteSql(DbClientTable, fmt.Sprintf("name='%v'", c.Name))); err != nil {
+			if _, err := operation.SelfClient.Exec(dbt.DeleteSql(DbClientTable, fmt.Sprintf("name='%v'", c.Name))); err != nil {
 				return err
 			} else {
 				DBContainer.Delete(c.Name)
@@ -100,7 +99,7 @@ func NewDB(c *cfg.DBClient) error {
 			if c.Op == UPDATE {
 				DBContainer.Store(c.Name, nil)
 				c.State = "fail: " + fail.Error()
-				if _, err := operation.SelfClient.Exec(operation.UpdateSql(
+				if _, err := operation.SelfClient.Exec(dbt.UpdateSql(
 					DbClientTable,
 					fmt.Sprintf("name='%v'", c.Name),
 					[]string{"content='" + comm.Encode(c) + "'"},
@@ -112,7 +111,7 @@ func NewDB(c *cfg.DBClient) error {
 		}
 		c.State = "success"
 		if c.Op == UPDATE {
-			if _, err := operation.SelfClient.Exec(operation.UpdateSql(
+			if _, err := operation.SelfClient.Exec(dbt.UpdateSql(
 				DbClientTable,
 				fmt.Sprintf("name='%v'", c.Name),
 				[]string{"content='" + comm.Encode(c) + "'"},
@@ -121,7 +120,7 @@ func NewDB(c *cfg.DBClient) error {
 			}
 		} else {
 			if _, err := operation.SelfClient.Exec(
-				operation.InsertSql(
+				dbt.InsertSql(
 					DbClientTable,
 					[]string{"name", "content"},
 					fmt.Sprintf("'%v','%v'", c.Name, comm.Encode(c)))); err != nil {
